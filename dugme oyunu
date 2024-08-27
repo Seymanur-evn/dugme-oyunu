@@ -1,0 +1,108 @@
+namespace WinFormsApp3
+{
+    public partial class Form1 : Form
+    {
+        private const int boyut = 90;
+        private Button oncekiButon = null; // İlk tıklanan butonu saklar
+        private Button griButon = null; // Gri renkteki butonu saklar
+
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            this.Text = "Düğme Oyunu";
+            this.ClientSize = new Size(boyut * 5, boyut * 5);
+            this.FormBorderStyle = FormBorderStyle.FixedSingle;
+
+            int x = 0, y = 0;
+            List<Button> butonlar = new List<Button>();
+
+            // 1'den 25'e kadar olan sayıları listeye ekliyoruz.
+            List<int> liste = new List<int>();
+            for (int a = 1; a <= 25; ++a)
+            {
+                liste.Add(a);
+            }
+
+            Random rastgele = new Random();
+
+            for (int i = 0; i < 5; i++)
+            {
+                x = 0;
+                for (int k = 0; k < 5; k++)
+                {
+                    if (liste.Count > 0)
+                    {
+                        int rastgeleSayiIndeksi = rastgele.Next(liste.Count);
+                        int rastgeleSayi = liste[rastgeleSayiIndeksi];
+
+                        Button button = new Button();
+                        button.Location = new Point(x, y);
+                        button.Size = new Size(boyut, boyut);
+                        button.Text = rastgeleSayi.ToString();
+
+                        button.Click += Button_Click; // Butonlara tıklama olayı ekleniyor
+
+                        // Eğer rastgeleSayi 25 ise, arka plan rengini gri yapıyoruz ve griButon olarak kaydediyoruz.
+                        if (rastgeleSayi == 25)
+                        {
+                            button.BackColor = this.BackColor;
+                            button.Text = "";
+                            griButon = button;
+                        }
+
+                        this.Controls.Add(button);
+                        butonlar.Add(button);
+
+                        liste.RemoveAt(rastgeleSayiIndeksi);
+                        x += boyut;
+                    }
+                }
+                y += boyut;
+            }
+        }
+
+        private void Button_Click(object sender, EventArgs e)
+        {
+            Button tiklananButon = sender as Button;
+
+            // İlk tıklanan buton saklanıyor
+            if (oncekiButon == null)
+            {
+                oncekiButon = tiklananButon;
+                return;
+            }
+
+            // Eğer gri butona basıldıysa ve önceki buton gri butonun komşusuysa yer değiştir.
+            if (tiklananButon == griButon && KomsuMu(oncekiButon, griButon))
+            {
+                Point oncekiKonum = oncekiButon.Location;
+                oncekiButon.Location = griButon.Location;
+                griButon.Location = oncekiKonum;
+            }
+
+            // İşlem sonrası önceki buton sıfırlanır
+            oncekiButon = null;
+        }
+
+        // İki butonun komşu olup olmadığını kontrol eden fonksiyon
+        private bool KomsuMu(Button buton1, Button buton2)
+        {
+            int x1 = buton1.Location.X;
+            int y1 = buton1.Location.Y;
+            int x2 = buton2.Location.X;
+            int y2 = buton2.Location.Y;
+
+            // Butonlar yanyana mı (sağ/sol)?
+            bool yanYanaMi = (x1 == x2 && Math.Abs(y1 - y2) == boyut);
+
+            // Butonlar üstüste mi (yukarı/aşağı)?
+            bool ustUsteMi = (y1 == y2 && Math.Abs(x1 - x2) == boyut);
+
+            return yanYanaMi || ustUsteMi;
+        }
+    }
+}
